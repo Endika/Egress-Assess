@@ -19,6 +19,10 @@ class Client:
         self.remote_server = cli_object.ip
         self.username = cli_object.username
         self.password = cli_object.password
+        if cli_object.client_port is None:
+            self.port = 21
+        else:
+            self.port = cli_object.client_port
         if cli_object.file is None:
             self.file_transfer = False
         else:
@@ -30,7 +34,8 @@ class Client:
     def transmit(self, data_to_transmit):
 
         try:
-            ftp = FTP(self.remote_server)
+            ftp = FTP()
+            ftp.connect(self.remote_server, self.port)
         except socket.gaierror:
             print "[*] Error: Cannot connect to FTP server.  Checking provided ip!"
             sys.exit()
@@ -44,7 +49,7 @@ class Client:
         if not self.file_transfer:
             ftp_file_name = helpers.writeout_text_data(data_to_transmit)
 
-            ftp.storlines(
+            ftp.storbinary(
                 "STOR " + ftp_file_name, open(helpers.ea_path()
                         + "/" + ftp_file_name))
             os.remove(helpers.ea_path() + "/" + ftp_file_name)
